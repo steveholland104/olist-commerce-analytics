@@ -1,0 +1,2 @@
+training_tail_threshold_days,training_extreme_tail_rate,testing_extreme_tail_rate,testing_roc_auc,testing_average_precision
+34.84323499999994,0.05009592837348113,0.04345558838866678,0.7772516809013266,0.14361015703680874

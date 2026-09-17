@@ -24,3 +24,10 @@ logs/
 # IDE/editor files
 .vscode/
 .idea/
+
+# Local learning / backup files
+learning/
+python/*_backup.py
+
+# Keep curated model outputs
+!outputs/model/*.csv
