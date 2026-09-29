@@ -1,0 +1,327 @@
+version: 2
+
+models:
+  - name: int_geolocation_zip
+    description: >
+      Geographic lookup containing one representative latitude and longitude
+      per ZIP prefix. Implausible coordinate observations are removed before
+      calculating median coordinates.
+
+    columns:
+      - name: geolocation_zip_prefix
+        description: ZIP code prefix represented by the geographic coordinates.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: latitude
+        description: Median latitude of valid geographic observations for the ZIP prefix.
+        data_tests:
+          - not_null
+
+      - name: longitude
+        description: Median longitude of valid geographic observations for the ZIP prefix.
+        data_tests:
+          - not_null
+
+      - name: geolocation_observation_count
+        description: Number of valid source geolocation observations used for the ZIP prefix.
+        data_tests:
+          - not_null
+
+
+
+
+
+  - name: int_order_items_rollup
+    description: >
+      Order-level rollup of Olist order items and product characteristics.
+      Produces one row per order with item counts, seller counts, monetary
+      totals, weight, and calculated product volume.
+
+    columns:
+      - name: order_id
+        description: Unique identifier for the rolled-up order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: item_count
+        description: Number of order-item records associated with the order.
+        data_tests:
+          - not_null
+
+      - name: distinct_product_count
+        description: Number of distinct products contained in the order.
+        data_tests:
+          - not_null
+
+      - name: seller_count
+        description: Number of distinct sellers represented in the order.
+        data_tests:
+          - not_null
+
+      - name: total_item_value
+        description: Sum of item prices for the order.
+        data_tests:
+          - not_null
+
+      - name: total_freight_value
+        description: Sum of freight charges for the order.
+        data_tests:
+          - not_null
+
+      - name: total_weight_g
+        description: Sum of available product weights for items in the order.
+
+      - name: total_volume_cm3
+        description: >
+          Sum of product length multiplied by height and width for items
+          in the order, expressed in cubic centimeters.
+
+
+
+
+  - name: int_order_geography
+    description: >
+      Order-level geography model joining customer locations and, for
+      single-seller orders, seller locations and representative ZIP-level
+      coordinates. Preserves one row per Olist order.
+
+    columns:
+      - name: order_id
+        description: Unique identifier for the order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: Customer record associated with the order.
+        data_tests:
+          - not_null
+
+      - name: seller_count
+        description: Number of distinct sellers represented in the order.
+
+      - name: seller_id
+        description: Seller identifier when the order contains exactly one seller.
+
+      - name: customer_zip_prefix
+        description: ZIP prefix associated with the customer.
+
+      - name: customer_state
+        description: Customer state.
+
+      - name: customer_latitude
+        description: Median cleaned latitude for the customer ZIP prefix.
+
+      - name: customer_longitude
+        description: Median cleaned longitude for the customer ZIP prefix.
+
+      - name: seller_zip_prefix
+        description: ZIP prefix associated with the seller for single-seller orders.
+
+      - name: seller_state
+        description: Seller state for single-seller orders.
+
+      - name: seller_latitude
+        description: Median cleaned latitude for the seller ZIP prefix.
+
+      - name: seller_longitude
+        description: Median cleaned longitude for the seller ZIP prefix.
+
+
+
+
+
+  - name: int_order_distance
+    description: >
+      Order-level geography model with great-circle seller-to-customer
+      distance calculated for single-seller orders with valid coordinates.
+
+    columns:
+      - name: order_id
+        description: Unique identifier for the order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: distance_km
+        description: >
+          Great-circle distance in kilometers between the seller and customer
+          ZIP-level representative coordinates for eligible single-seller orders.
+
+
+
+
+
+  - name: int_delivery_timing
+    description: >
+      Order-level delivery timing model calculating fulfillment stages,
+      total delivery time, promised delivery time, and performance relative
+      to the estimated delivery date. Preserves one row per order.
+
+    columns:
+      - name: order_id
+        description: Unique identifier for the order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: purchase_to_carrier_days
+        description: Days from order purchase to carrier handoff.
+
+      - name: carrier_to_customer_days
+        description: Days from carrier handoff to customer delivery.
+
+      - name: total_delivery_days
+        description: Days from order purchase to customer delivery.
+
+      - name: promised_days_from_purchase
+        description: Days between purchase and the estimated delivery date.
+
+      - name: days_vs_estimate
+        description: >
+          Difference between actual and estimated delivery timing in days.
+          Positive values indicate late delivery and negative values indicate
+          delivery ahead of estimate.
+
+      - name: is_late
+        description: Indicates whether the order was delivered after the estimated delivery calendar date.
+
+      - name: has_valid_delivery_chronology
+        description: >
+          Indicates that purchase, carrier handoff, and customer delivery
+          timestamps exist and occur in chronological order.
+        data_tests:
+          - not_null
+
+
+
+
+
+  - name: int_order_review_summary
+    description: >
+      Order-level summary of customer reviews. Aggregates potentially multiple
+      review records into one row per order while retaining score distribution,
+      review timing, and a poor-review indicator.
+
+    columns:
+      - name: order_id
+        description: Unique identifier for the reviewed order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: review_count
+        description: Number of review records associated with the order.
+        data_tests:
+          - not_null
+
+      - name: average_review_score
+        description: Average review score across review records for the order.
+        data_tests:
+          - not_null
+
+      - name: minimum_review_score
+        description: Lowest review score recorded for the order.
+        data_tests:
+          - not_null
+
+      - name: maximum_review_score
+        description: Highest review score recorded for the order.
+        data_tests:
+          - not_null
+
+      - name: first_review_created_at
+        description: Earliest review creation timestamp associated with the order.
+        data_tests:
+          - not_null
+
+      - name: last_review_created_at
+        description: Latest review creation timestamp associated with the order.
+        data_tests:
+          - not_null
+
+      - name: has_poor_review
+        description: Indicates whether any review associated with the order has a score of 1 or 2.
+        data_tests:
+          - not_null
+
+
+
+
+
+  - name: int_order_product_summary
+    description: >
+      Order-level product category summary. Uses English category names when
+      available and assigns a single order-level category only when all
+      categorized products in the order belong to the same category.
+
+    columns:
+      - name: order_id
+        description: Unique identifier for the order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: distinct_category_count
+        description: Number of distinct product categories represented in the order.
+        data_tests:
+          - not_null
+
+      - name: product_category
+        description: >
+          Product category assigned when the order contains exactly one
+          distinct categorized product category.
+
+
+
+
+
+  - name: int_order_delivery_analysis
+    description: >
+      Unified order-level analytical model combining delivery timing,
+      seller-to-customer geography, order characteristics, product category,
+      and customer review information. Preserves one row per Olist order.
+
+    columns:
+      - name: order_id
+        description: Unique identifier for the order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: Customer record associated with the order.
+        data_tests:
+          - not_null
+
+      - name: order_status
+        description: Recorded lifecycle status of the order.
+        data_tests:
+          - not_null
+
+      - name: distance_km
+        description: >
+          Great-circle seller-to-customer distance for eligible
+          single-seller orders.
+
+      - name: item_count
+        description: Number of order-item records associated with the order.
+
+      - name: seller_count
+        description: Number of distinct sellers represented in the order.
+
+      - name: product_category
+        description: >
+          Order-level product category when the order contains exactly one
+          distinct categorized product category.
+
+      - name: has_poor_review
+        description: Indicates whether any review associated with the order has a score of 1 or 2.
+
+      - name: review_submitted_before_delivery
+        description: >
+          Indicates whether the first customer review was submitted before
+          the recorded customer delivery timestamp.

@@ -1,0 +1,60 @@
+version: 2
+
+models:
+  - name: fct_delivery_orders
+    description: >
+      Business-facing delivery performance fact table containing one row per
+      delivered order with valid fulfillment chronology. Combines delivery
+      timing, geography, order characteristics, product category, and customer
+      review outcomes. Materialized incrementally using order_id as the unique
+      merge key and a 60-day event-time lookback.
+
+    columns:
+      - name: order_id
+        description: Unique identifier for the delivered order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: Customer associated with the order.
+        data_tests:
+          - not_null
+
+      - name: purchased_at
+        description: Timestamp when the order was placed.
+        data_tests:
+          - not_null
+
+      - name: total_delivery_days
+        description: Total days from purchase to customer delivery.
+        data_tests:
+          - not_null
+
+      - name: carrier_to_customer_days
+        description: Days from carrier handoff to customer delivery.
+        data_tests:
+          - not_null
+
+      - name: purchase_to_carrier_days
+        description: Days from purchase to carrier handoff.
+        data_tests:
+          - not_null
+
+      - name: distance_km
+        description: >
+          Great-circle seller-to-customer distance for eligible
+          single-seller orders.
+
+      - name: is_late
+        description: Indicates whether the order arrived after its estimated delivery date.
+
+      - name: has_poor_review
+        description: Indicates whether any associated review has a score of 1 or 2.
+
+      - name: record_updated_at
+        description: >
+          Latest known operational or review event timestamp for the order,
+          used to support incremental processing.
+        data_tests:
+          - not_null

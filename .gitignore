@@ -8,6 +8,7 @@
 # Python
 .venv/
 venv/
+.dbt-venv/
 __pycache__/
 *.pyc
 

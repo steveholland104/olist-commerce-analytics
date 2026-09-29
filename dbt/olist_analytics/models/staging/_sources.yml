@@ -1,0 +1,35 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw Olist marketplace data loaded into Snowflake from the original source CSV files.
+    database: OLIST_ANALYTICS
+    schema: RAW
+
+    tables:
+      - name: customers
+        identifier: CUSTOMERS
+
+      - name: sellers
+        identifier: SELLERS
+
+      - name: orders
+        identifier: ORDERS
+
+      - name: order_items
+        identifier: ORDER_ITEMS
+
+      - name: products
+        identifier: PRODUCTS
+
+      - name: product_category_translation
+        identifier: PRODUCT_CATEGORY_TRANSLATION
+
+      - name: order_payments
+        identifier: ORDER_PAYMENTS
+
+      - name: order_reviews
+        identifier: ORDER_REVIEWS
+
+      - name: geolocation
+        identifier: GEOLOCATION

@@ -1,0 +1,313 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: >
+      Cleaned staging view of Olist orders. Preserves one row per order
+      while standardizing timestamp column names for downstream models.
+
+    columns:
+      - name: order_id
+        description: Unique identifier for an order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: Identifier linking the order to the customer record.
+        data_tests:
+          - not_null
+
+      - name: order_status
+        description: Current recorded status of the order.
+        data_tests:
+          - not_null
+
+      - name: purchased_at
+        description: Timestamp when the customer placed the order.
+        data_tests:
+          - not_null
+
+      - name: approved_at
+        description: Timestamp when payment for the order was approved.
+
+      - name: delivered_to_carrier_at
+        description: Timestamp when the order was handed to the carrier.
+
+      - name: delivered_to_customer_at
+        description: Timestamp when the order was delivered to the customer.
+
+      - name: estimated_delivery_at
+        description: Delivery date originally estimated for the order.
+
+
+
+  - name: stg_customers
+    description: >
+      Cleaned staging view of Olist customer records. Preserves one row per
+      customer_id while standardizing the customer ZIP prefix field name.
+
+    columns:
+      - name: customer_id
+        description: Unique identifier for the customer record associated with an order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_unique_id
+        description: Identifier representing the underlying customer across multiple orders.
+        data_tests:
+          - not_null
+
+      - name: customer_zip_prefix
+        description: ZIP code prefix associated with the customer location.
+        data_tests:
+          - not_null
+
+      - name: customer_city
+        description: Customer city.
+
+      - name: customer_state
+        description: Two-letter Brazilian state abbreviation.
+        data_tests:
+          - not_null
+
+
+
+  - name: stg_sellers
+    description: >
+      Cleaned staging view of Olist seller records. Preserves one row per
+      seller while standardizing the seller ZIP prefix field name.
+
+    columns:
+      - name: seller_id
+        description: Unique identifier for the seller.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: seller_zip_prefix
+        description: ZIP code prefix associated with the seller location.
+        data_tests:
+          - not_null
+
+      - name: seller_city
+        description: Seller city.
+
+      - name: seller_state
+        description: Two-letter Brazilian state abbreviation.
+        data_tests:
+          - not_null
+
+
+
+
+  - name: stg_order_items
+    description: >
+      Cleaned staging view of Olist order items. Preserves one row per order item
+      and standardizes shipping and monetary field names.
+
+    columns:
+      - name: order_id
+        description: Identifier for the order containing the item.
+        data_tests:
+          - not_null
+
+      - name: order_item_id
+        description: Sequential item identifier within an order.
+        data_tests:
+          - not_null
+
+      - name: product_id
+        description: Identifier for the purchased product.
+        data_tests:
+          - not_null
+
+      - name: seller_id
+        description: Identifier for the seller fulfilling the item.
+        data_tests:
+          - not_null
+
+      - name: shipping_limit_at
+        description: Seller shipping deadline recorded for the item.
+
+      - name: item_price
+        description: Item sale price.
+        data_tests:
+          - not_null
+
+      - name: freight_value
+        description: Freight charge associated with the item.
+        data_tests:
+          - not_null
+
+
+
+
+  - name: stg_products
+    description: >
+      Cleaned staging view of Olist product records. Preserves one row per
+      product while correcting source field names and standardizing product attributes.
+
+    columns:
+      - name: product_id
+        description: Unique identifier for the product.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_category_name
+        description: Original Portuguese product category name.
+
+      - name: product_name_length
+        description: Length of the product name in characters.
+
+      - name: product_description_length
+        description: Length of the product description in characters.
+
+      - name: product_photo_count
+        description: Number of product photos associated with the listing.
+
+      - name: product_weight_g
+        description: Product weight in grams.
+
+      - name: product_length_cm
+        description: Product length in centimeters.
+
+      - name: product_height_cm
+        description: Product height in centimeters.
+
+      - name: product_width_cm
+        description: Product width in centimeters.
+
+
+
+
+  - name: stg_product_category_translation
+    description: >
+      Staging view of the Olist product category translation lookup,
+      mapping Portuguese category names to English category names.
+
+    columns:
+      - name: product_category_name
+        description: Original Portuguese product category name.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_category_name_english
+        description: English translation of the product category name.
+        data_tests:
+          - not_null
+          - unique
+
+
+
+
+  - name: stg_order_payments
+    description: >
+      Cleaned staging view of Olist payment records. Preserves one row per
+      payment event, allowing multiple payment records for a single order.
+
+    columns:
+      - name: order_id
+        description: Identifier for the order associated with the payment.
+        data_tests:
+          - not_null
+
+      - name: payment_sequential
+        description: Sequential number of the payment method used for the order.
+        data_tests:
+          - not_null
+
+      - name: payment_type
+        description: Payment method used for the transaction.
+        data_tests:
+          - not_null
+
+      - name: payment_installments
+        description: Number of installments used for the payment.
+        data_tests:
+          - not_null
+
+      - name: payment_value
+        description: Monetary value of the payment.
+        data_tests:
+          - not_null
+
+
+
+
+
+  - name: stg_order_reviews
+    description: >
+      Cleaned staging view of Olist order reviews. Preserves the source review
+      records while standardizing review timestamp field names.
+
+    columns:
+      - name: review_id
+        description: Identifier for the review record.
+        data_tests:
+          - not_null
+
+      - name: order_id
+        description: Identifier for the reviewed order.
+        data_tests:
+          - not_null
+
+      - name: review_score
+        description: Customer review score from 1 to 5.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+
+      - name: review_comment_title
+        description: Optional review title supplied by the customer.
+
+      - name: review_comment_message
+        description: Optional review text supplied by the customer.
+
+      - name: review_created_at
+        description: Timestamp when the review was created.
+        data_tests:
+          - not_null
+
+      - name: review_answered_at
+        description: Timestamp when the review was answered.
+        data_tests:
+          - not_null
+
+
+
+
+  - name: stg_geolocation
+    description: >
+      Cleaned staging view of Olist geolocation observations. Preserves the
+      source-level geographic records while standardizing coordinate and ZIP
+      prefix field names.
+
+    columns:
+      - name: geolocation_zip_prefix
+        description: ZIP code prefix associated with the geographic observation.
+        data_tests:
+          - not_null
+
+      - name: latitude
+        description: Latitude associated with the geographic observation.
+        data_tests:
+          - not_null
+
+      - name: longitude
+        description: Longitude associated with the geographic observation.
+        data_tests:
+          - not_null
+
+      - name: city
+        description: City associated with the geographic observation.
+
+      - name: state
+        description: Two-letter Brazilian state abbreviation.
+        data_tests:
+          - not_null
